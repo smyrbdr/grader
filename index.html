@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Not Asistanı</title>
+<meta name="theme-color" content="#1f5fa8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f5f6f8;--surface:#ffffff;--surface2:#f0f2f5;--text:#1b1f24;--muted:#5d6672;--border:#dde1e6;
+  --primary:#1f5fa8;--primary-text:#ffffff;--ok:#1e7d4f;--ok-bg:#e2f3e9;--warn:#7a5200;--warn-bg:#fff3d1;
+  --bad:#b3261e;--bad-bg:#fde6e4;--shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121519;--surface:#1b1f25;--surface2:#232831;--text:#e7eaee;--muted:#9aa4b1;--border:#2f3640;
+    --primary:#5b9be6;--primary-text:#0d1117;--ok:#5fcf98;--ok-bg:#16301f;--warn:#f0c160;--warn-bg:#352a10;
+    --bad:#ff8a80;--bad-bg:#3a1a18;--shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121519;--surface:#1b1f25;--surface2:#232831;--text:#e7eaee;--muted:#9aa4b1;--border:#2f3640;
+  --primary:#5b9be6;--primary-text:#0d1117;--ok:#5fcf98;--ok-bg:#16301f;--warn:#f0c160;--warn-bg:#352a10;
+  --bad:#ff8a80;--bad-bg:#3a1a18;--shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{background:none;border:0;font-weight:700;font-size:17px;color:var(--text);cursor:pointer;padding:4px 0}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:10px;width:40px;height:40px;font-size:18px;color:var(--text);cursor:pointer}
+main{max-width:880px;margin:0 auto;padding:16px;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+h1{font-size:22px;margin:0}
+h2{font-size:18px;margin:0 0 8px}
+h3{font-size:16px;margin:0}
+a{color:var(--primary)}
+.row{display:flex;align-items:center}
+.between{justify-content:space-between}
+.end{justify-content:flex-end}
+.gap{gap:8px}
+.wrap{flex-wrap:wrap}
+.mt{margin-top:14px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 14px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-text)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--bad)}
+.btn.small{min-height:34px;padding:4px 10px;font-size:13px}
+.btn.block{width:100%;margin-top:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-top:12px}
+.list{display:grid;gap:10px;margin-top:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:left;font:inherit;color:inherit;box-shadow:var(--shadow)}
+.exam-card{cursor:pointer;width:100%}
+.card-title{font-weight:700;font-size:16px}
+.empty{padding:36px 12px;text-align:center;color:var(--muted)}
+.field{display:block;margin-top:14px}
+.field>span{display:block;font-weight:600;margin-bottom:6px}
+input,textarea,select{width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 10px}
+textarea{resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:-1px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.thumb{position:relative;width:96px;height:128px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface2)}
+.thumb img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;display:block}
+.thumb .x{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:16px;cursor:pointer}
+.mask-ov{position:absolute;background:rgba(0,0,0,.85);outline:2px solid #e53935;pointer-events:none}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}
+.tab{flex:1 0 auto;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--primary);color:var(--primary-text);border-color:var(--primary)}
+.tab:disabled{opacity:.45}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface2);color:var(--muted)}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.badge.bad{background:var(--bad-bg);color:var(--bad)}
+.note{padding:10px 12px;border-radius:10px;background:var(--surface2);margin-top:10px}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.bad{background:var(--bad-bg);color:var(--bad)}
+.qcard{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px;background:var(--surface)}
+.qhead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
+.mini{display:flex;flex-direction:column;font-size:12px;font-weight:600;color:var(--muted)}
+.mini input{width:84px}
+.sum{font-size:13px;font-weight:700;padding:4px 8px;border-radius:8px}
+.sum.ok{background:var(--ok-bg);color:var(--ok)}
+.sum.bad{background:var(--bad-bg);color:var(--bad)}
+.preview{font-size:14px;color:var(--muted);padding:4px 2px;min-height:1em;overflow-x:auto}
+.step{display:grid;grid-template-columns:1fr 76px 36px;gap:6px;align-items:start;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+.step .preview{grid-column:1/-1}
+.x-btn{height:40px;border:1px solid var(--border);background:var(--surface);border-radius:9px;color:var(--bad);font-size:18px;cursor:pointer}
+details{margin-top:10px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+.ro-step{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px dashed var(--border)}
+.pts{font-weight:700;white-space:nowrap}
+.paper-row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--border)}
+.paper-row:first-child{border-top:0}
+.paper-row .acts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.score{font-weight:700;font-size:16px;text-align:right}
+.tbl-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--border);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--surface2);position:sticky;top:0}
+tbody tr{cursor:pointer}
+tfoot td{font-weight:700;background:var(--surface2)}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px}
+.modal.hidden,.hidden{display:none !important}
+.modal-box{background:var(--surface);color:var(--text);border-radius:14px;padding:16px;width:100%;max-width:760px;margin:auto 0}
+.mask-wrap{display:flex;justify-content:center;background:var(--surface2);border-radius:10px;padding:6px}
+.mask-wrap canvas{touch-action:none;max-width:100%;cursor:crosshair}
+.review-imgs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.review-imgs img{height:220px;border-radius:8px;border:1px solid var(--border);cursor:zoom-in}
+.rv-step{display:grid;grid-template-columns:1fr 92px;gap:6px 10px;padding:8px 0;border-top:1px dashed var(--border)}
+.rv-step .reason{grid-column:1/-1}
+.rv-pts{display:flex;align-items:center;gap:4px;font-weight:700}
+.rv-pts input{width:62px;text-align:right}
+.transcript{background:var(--surface2);border-radius:8px;padding:8px;font-size:14px;margin-top:6px;overflow-x:auto}
+.sticky-foot{position:sticky;bottom:-16px;background:var(--surface);padding:12px 0 4px;border-top:1px solid var(--border);margin-top:12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;background:#222;color:#fff;padding:10px 16px;border-radius:10px;max-width:90vw;font-size:14px}
+.busy{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.busy-box{background:var(--surface);color:var(--text);border-radius:14px;padding:20px;max-width:360px;width:100%;text-align:center}
+.spinner{width:34px;height:34px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.full-img{width:100%;display:block;border-radius:8px}
+.top{flex-wrap:wrap}
+.qbar{flex-basis:100%;display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:13px;font-weight:600;
+  background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:6px 10px}
+.qbar .btn{min-height:30px;padding:2px 10px;font-size:12px}
+.spin-sm{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin 1s linear infinite;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="brand" onclick="goHome()">Not Asistanı</button>
+  <button class="icon-btn" onclick="openSettings()" aria-label="Ayarlar" title="Ayarlar">⚙</button>
+  <div id="qbar" class="qbar hidden" role="status" aria-live="polite"><span id="qbar-text"></span><button class="btn small" onclick="stopQueue()">Durdur</button></div>
+</header>
+<main id="app"></main>
+<div id="modal" class="modal hidden" onclick="if(event.target===this && MODAL_DISMISS) closeModal()"></div>
+<div id="busy" class="busy hidden"><div class="busy-box"><div class="spinner"></div><div id="busy-text"></div><div id="busy-note" class="muted small"></div><button id="busy-cancel" class="btn small mt hidden" onclick="CANCEL=true">Durdur</button></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+'use strict';
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ================= Yardımcılar ================= */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const r05 = x => Math.round(Number(x) * 2) / 2;
+const fmt = x => (Math.round(Number(x || 0) * 100) / 100).toLocaleString('tr-TR');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const clone = o => JSON.parse(JSON.stringify(o));
+let MODAL_DISMISS = true, CANCEL = false;
+
+function toast(msg, ms = 2800) {
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), ms);
+}
+function setBusy(msg, cancellable = false) {
+  const b = $('#busy');
+  if (!msg) { b.classList.add('hidden'); return; }
+  $('#busy-text').textContent = msg; $('#busy-note').textContent = '';
+  $('#busy-cancel').classList.toggle('hidden', !cancellable);
+  b.classList.remove('hidden');
+}
+function setBusyNote(msg) { $('#busy-note').textContent = msg || ''; if (typeof Q !== 'undefined') { Q.note = msg || ''; updateQueueBar(); } }
+function showError(err) { console.error(err); alert('Hata: ' + (err && err.message ? err.message : err)); }
+
+function renderMath(el) {
+  if (!el || !window.renderMathInElement) return;
+  try {
+    renderMathInElement(el, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true}, {left: '\\[', right: '\\]', display: true},
+        {left: '$', right: '$', display: false}, {left: '\\(', right: '\\)', display: false}],
+      throwOnError: false, ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'input', 'option']
+    });
+  } catch (e) { /* matematik önizlemesi isteğe bağlı */ }
+}
+function showModal(html, dismiss = true) {
+  MODAL_DISMISS = dismiss;
+  const m = $('#modal'); m.innerHTML = `<div class="modal-box">${html}</div>`;
+  m.classList.remove('hidden'); renderMath(m); return m;
+}
+function closeModal() { const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = ''; }
+function viewImage(src) {
+  const prev = $('#modal').classList.contains('hidden') ? null : $('#modal').innerHTML;
+  showModal(`<div class="row between"><h2>Görüntü</h2><button class="btn small" id="img-close">Kapat</button></div><img class="full-img" src="${src}">`);
+  $('#img-close').onclick = () => {
+    if (prev) { const m = $('#modal'); m.innerHTML = prev; restoreModalHandlers(); } else closeModal();
+  };
+}
+let restoreModalHandlers = () => {};
+/* ---------- Yerel (Android) ortam ---------- */
+const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const Plug = n => (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]) || null;
+function blobToBase64(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
+}
+async function saveNative(blob, name) {
+  const FS = Plug('Filesystem'), Share = Plug('Share');
+  if (!FS) throw new Error('Dosya sistemi eklentisi bulunamadı');
+  const data = await blobToBase64(blob);
+  let uri = null, inDocs = false;
+  try {
+    uri = (await FS.writeFile({path: `Not Asistani/${name}`, data, directory: 'DOCUMENTS', recursive: true})).uri; inDocs = true;
+  } catch (e) {
+    uri = (await FS.writeFile({path: name, data, directory: 'CACHE'})).uri;
+  }
+  if (inDocs) toast(`Kaydedildi: Belgeler › Not Asistani › ${name}`, 5000);
+  const ask = inDocs ? 'Dosya Belgeler/Not Asistani klasörüne kaydedildi.\n\nAyrıca paylaşmak ister misiniz? (Drive, e-posta, WhatsApp…)'
+                     : 'Belgeler klasörüne yazılamadı. Dosyayı paylaşım menüsünden kaydetmek ister misiniz?';
+  if (Share && confirm(ask)) { try { await Share.share({title: name, files: [uri]}); } catch (e) { /* kullanıcı vazgeçti */ } }
+}
+function download(blob, name) {
+  if (NATIVE) { saveNative(blob, name).catch(showError); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+const safeName = s => (s || 'sinav').replace(/[\\/:*?"<>|]+/g, '_').trim().slice(0, 60) || 'sinav';
+
+/* ================= Ayarlar ================= */
+const SETTINGS_KEY = 'na_settings';
+const DEFAULT_SETTINGS = {apiKey: '', model: 'gemini-3.8-flash', delay: 6};
+const RETIRED_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite'];
+function loadSettings() {
+  try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); }
+  catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
+}
+let settings = loadSettings();
+if (RETIRED_MODELS.includes(settings.model)) { settings.model = DEFAULT_SETTINGS.model; try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
+function saveSettings() {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+  catch (e) { toast('Ayarlar tarayıcıya kaydedilemedi.'); }
+}
+function openSettings() {
+  showModal(`
+    <h2>Ayarlar</h2>
+    <label class="field"><span>Gemini API anahtarı</span>
+      <div class="row gap">
+        <input id="set-key" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"
+          data-lpignore="true" data-1p-ignore data-form-type="other" name="gemini-api-key-field"
+          value="${esc(settings.apiKey)}" placeholder="API anahtarınızı yapıştırın">
+        <button type="button" class="icon-btn" id="key-eye" onclick="toggleKey()" aria-label="Anahtarı göster" title="Göster / gizle">👁</button>
+      </div>
+    </label>
+    <p class="muted small">Ücretsiz anahtarı <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> adresinden alabilirsiniz. Anahtar yalnızca bu cihazın tarayıcısında saklanır.</p>
+    <label class="field"><span>Model</span>
+      <input id="set-model" list="models" value="${esc(settings.model)}">
+      <datalist id="models"><option value="gemini-3.8-flash"></datalist>
+    </label>
+    <label class="field"><span>Toplu değerlendirmede kâğıtlar arası bekleme (sn)</span>
+      <input id="set-delay" type="number" min="0" step="1" value="${esc(settings.delay)}">
+    </label>
+    <div class="note warn small">Ücretsiz katmanda Google, gönderilen içerikleri ürünlerini geliştirmek için kullanabilir ve insan değerlendiriciler okuyabilir. Bu yüzden öğrenci kâğıtlarındaki ad/numara bölgesi gönderilmeden önce kapatılır; numarayı siz girersiniz.</div>
+    ${NATIVE ? '' : '<p class="small mt"><a href="privacy.html" target="_blank" rel="noopener">Gizlilik politikası</a></p>'}
+    <div class="row gap end mt wrap">
+      <button class="btn ghost" onclick="testConnection()">Bağlantıyı test et</button>
+      <button class="btn ghost" onclick="closeModal()">Kapat</button>
+      <button class="btn primary" onclick="saveSettingsFromForm()">Kaydet</button>
+    </div>`);
+}
+function toggleKey() {
+  const i = $('#set-key'), b = $('#key-eye'), show = i.type === 'password';
+  i.type = show ? 'text' : 'password'; b.textContent = show ? '🙈' : '👁';
+  b.setAttribute('aria-label', show ? 'Anahtarı gizle' : 'Anahtarı göster');
+}
+function cleanKey(k) { return String(k || '').trim(); }
+function readSettingsForm() {
+  settings.apiKey = cleanKey($('#set-key').value);
+  settings.model = $('#set-model').value.trim() || DEFAULT_SETTINGS.model;
+  settings.delay = Math.max(0, Number($('#set-delay').value) || 0);
+}
+function saveSettingsFromForm() { readSettingsForm(); saveSettings(); closeModal(); toast('Ayarlar kaydedildi'); render(); }
+async function testConnection() {
+  readSettingsForm(); saveSettings();
+  if (!settings.apiKey) return toast('Önce API anahtarını girin');
+  setBusy('Bağlantı test ediliyor…');
+  try { const out = await callGemini([{text: 'Sadece şu JSON\'u döndür: {"ok": true}'}], {retries: 0}); toast(out && out.ok ? 'Bağlantı başarılı ✓' : 'Yanıt alındı'); }
+  catch (e) { showError(e); } finally { setBusy(null); }
+}
+function requireKey() {
+  if (settings.apiKey) return true;
+  toast('Önce Ayarlar\'dan Gemini API anahtarını girin'); openSettings(); return false;
+}
+
+/* ================= IndexedDB ================= */
+const DB = {
+  db: null,
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('not-asistani', 1);
+      r.onupgradeneeded = () => {
+        const d = r.result;
+        d.createObjectStore('exams', {keyPath: 'id'});
+        d.createObjectStore('papers', {keyPath: 'id'}).createIndex('examId', 'examId');
+      };
+      r.onsuccess = () => { this.db = r.result; res(); };
+      r.onerror = () => rej(r.error);
+    });
+  },
+  store(name, mode) { return this.db.transaction(name, mode).objectStore(name); },
+  req(r) { return new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  put(s, o) { return this.req(this.store(s, 'readwrite').put(o)); },
+  get(s, id) { return this.req(this.store(s, 'readonly').get(id)); },
+  all(s) { return this.req(this.store(s, 'readonly').getAll()); },
+  del(s, id) { return this.req(this.store(s, 'readwrite').delete(id)); },
+  byExam(id) { return this.req(this.store('papers', 'readonly').index('examId').getAll(id)); }
+};
+
+/* ================= Görüntü işleme ================= */
+function loadImg(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Görüntü açılamadı')); i.src = src; });
+}
+async function compressImage(file, max = 1800) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.85);
+  } finally { URL.revokeObjectURL(url); }
+}
+async function pdfToImages(file) {
+  if (!window.pdfjsLib) throw new Error('PDF kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)');
+  const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+  const out = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const v1 = page.getViewport({scale: 1});
+    const v = page.getViewport({scale: Math.min(3, 1800 / Math.max(v1.width, v1.height))});
+    const c = document.createElement('canvas'); c.width = Math.round(v.width); c.height = Math.round(v.height);
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({canvasContext: ctx, viewport: v}).promise;
+    out.push(c.toDataURL('image/jpeg', 0.85));
+  }
+  return out;
+}
+async function filesToImages(files) {
+  const out = [];
+  for (const f of Array.from(files || [])) {
+    if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) out.push(...await pdfToImages(f));
+    else out.push(await compressImage(f));
+  }
+  return out;
+}
+async function applyMask(src, m) {
+  const img = await loadImg(src);
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+  ctx.fillStyle = '#000'; ctx.fillRect(m.x * c.width, m.y * c.height, m.w * c.width, m.h * c.height);
+  return c.toDataURL('image/jpeg', 0.85);
+}
+function imgPart(dataURL) {
+  return {inline_data: {mime_type: dataURL.slice(5, dataURL.indexOf(';')), data: dataURL.slice(dataURL.indexOf(',') + 1)}};
+}
+const maskOverlay = m => m ? `<div class="mask-ov" style="left:${m.x * 100}%;top:${m.y * 100}%;width:${m.w * 100}%;height:${m.h * 100}%"></div>` : '';
+
+/* Maske düzenleyici: dikdörtgen çizme */
+let MASK = null;
+async function openMaskEditor(src, initial, onDone) {
+  MASK = {rect: initial ? {...initial} : null, onDone};
+  showModal(`
+    <h2>Ad / numara bölgesi</h2>
+    <p class="muted small">Parmağınızla veya fareyle sürükleyerek öğrenci adı ve numarasının bulunduğu alanı çizin. Bu alan yapay zekaya gönderilmeden önce siyahla kapatılır.</p>
+    <div class="mask-wrap" id="mask-wrap"><canvas id="maskc"></canvas></div>
+    <div class="row gap end mt wrap">
+      <button class="btn ghost" onclick="finishMask('none')">Bölge yok</button>
+      <button class="btn ghost" onclick="finishMask('cancel')">Vazgeç</button>
+      <button class="btn primary" onclick="finishMask('save')">Kaydet</button>
+    </div>`, false);
+  const img = await loadImg(src);
+  const cv = $('#maskc'), wrap = $('#mask-wrap');
+  let w = wrap.clientWidth - 12; let h = w * img.naturalHeight / img.naturalWidth;
+  const maxH = window.innerHeight * 0.62; if (h > maxH) { h = maxH; w = h * img.naturalWidth / img.naturalHeight; }
+  cv.width = Math.round(w); cv.height = Math.round(h);
+  const ctx = cv.getContext('2d');
+  const draw = () => {
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    const r = MASK.rect; if (!r) return;
+    ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(r.x * cv.width, r.y * cv.height, r.w * cv.width, r.h * cv.height);
+    ctx.strokeStyle = '#e53935'; ctx.lineWidth = 2; ctx.strokeRect(r.x * cv.width, r.y * cv.height, r.w * cv.width, r.h * cv.height);
+  };
+  draw();
+  let start = null;
+  const pos = ev => { const b = cv.getBoundingClientRect(); return {x: Math.min(1, Math.max(0, (ev.clientX - b.left) / b.width)), y: Math.min(1, Math.max(0, (ev.clientY - b.top) / b.height))}; };
+  cv.onpointerdown = ev => { cv.setPointerCapture(ev.pointerId); start = pos(ev); };
+  cv.onpointermove = ev => {
+    if (!start) return; const p = pos(ev);
+    MASK.rect = {x: Math.min(start.x, p.x), y: Math.min(start.y, p.y), w: Math.abs(p.x - start.x), h: Math.abs(p.y - start.y)}; draw();
+  };
+  cv.onpointerup = () => { start = null; if (MASK.rect && (MASK.rect.w < 0.01 || MASK.rect.h < 0.01)) { MASK.rect = null; draw(); } };
+}
+function finishMask(kind) {
+  const cb = MASK && MASK.onDone; const rect = MASK && MASK.rect; MASK = null;
+  if (!cb) return closeModal();
+  if (kind === 'cancel') cb(undefined); else if (kind === 'none') cb(null); else cb(rect || null);
+}
+
+/* ================= Gemini ================= */
+function parseJSON(t) {
+  t = String(t).trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+  try { return JSON.parse(t); }
+  catch (e) { const m = t.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); throw new Error('Model yanıtı JSON olarak okunamadı'); }
+}
+async function callGemini(parts, {retries = 3} = {}) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(settings.model)}:generateContent`;
+  const body = JSON.stringify({contents: [{role: 'user', parts}], generationConfig: {temperature: 0.2, responseMimeType: 'application/json'}});
+  if (/[^\x20-\x7E]/.test(cleanKey(settings.apiKey))) throw new Error('API anahtarında görünmez veya özel bir karakter var. Ayarlar\'da 👁 ile kontrol edip anahtarı yeniden yapıştırın.');
+  for (let a = 0; ; a++) {
+    let res;
+    try { res = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': cleanKey(settings.apiKey)}, body}); }
+    catch (err) { if (a < retries) { await sleep(3000 * (a + 1)); continue; } throw new Error('Ağ hatası: ' + err.message); }
+    if ([429, 500, 503].includes(res.status) && a < retries) {
+      const wait = 20 * (a + 1);
+      setBusyNote(`Kota veya yoğunluk sınırı: ${wait} sn sonra yeniden denenecek…`);
+      await sleep(wait * 1000); setBusyNote(''); continue;
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = (data.error && data.error.message) || `HTTP ${res.status}`;
+      const sug = msg.match(/use models\/([A-Za-z0-9.\-]+)/);
+      if (sug && sug[1] !== settings.model && !callGemini._switched) {
+        callGemini._switched = true;
+        settings.model = sug[1]; saveSettings();
+        toast(`Model güncellendi: ${sug[1]}`, 4000);
+        const r = await callGemini(parts, {retries}); callGemini._switched = false; return r;
+      }
+      callGemini._switched = false;
+      throw new Error(msg);
+    }
+    const cand = data.candidates && data.candidates[0];
+    const text = ((cand && cand.content && cand.content.parts) || []).filter(p => !p.thought).map(p => p.text || '').join('');
+    if (!text) throw new Error('Model boş yanıt döndürdü' + (cand && cand.finishReason ? ` (${cand.finishReason})` : ''));
+    return parseJSON(text);
+  }
+}
+
+/* ================= Rubrik ================= */
+const RUBRIC_SCHEMA = `{
+  "questions": [
+    {
+      "id": "1a",
+      "text": "soru metni ($...$ içinde LaTeX)",
+      "maxPoints": 3,
+      "answer": "doğru sonuç",
+      "solution": "kısa model çözüm",
+      "steps": [ { "description": "bu adımda beklenen iş", "points": 1 } ],
+      "guidance": "sık yapılan hatalar ve bunlara nasıl kısmi puan verileceği"
+    }
+  ],
+  "generalRules": "tüm sınav için genel puanlama kuralları"
+}`;
+function rubricPrompt(notes) {
+  return `Sen deneyimli bir üniversite matematik öğretim üyesisin. Ekteki görüntüler bir sınav/quiz kâğıdının sorularını içeriyor.
+Görevin: her soru ve alt şık için adil, adım adım bir puanlama rubriği önermek.
+
+Kurallar:
+- Kâğıtta yazan puanları (ör. "[9 P]") kesinlikle kullan. Alt şıklara ayrı puan yazılmamışsa soru puanını alt şıklara zorluklarına göre adil dağıt.
+- Her alt şıkkı ayrı bir öğe olarak ver (id: "1a", "1b", "2", "3" gibi). Alt şıkkı olmayan sorunun id'si soru numarasıdır.
+- Önce her şıkkı kendin doğru çöz; "answer" ve "solution" alanlarını buna göre doldur.
+- Çözümü doğal adımlarına böl. Adım puanlarının toplamı maxPoints'e TAM eşit olsun. Puanlar 0.5'in katı olsun.
+- Puanı yalnızca son cevaba değil, kavramsal olarak önemli adımlara (yöntem seçimi, kritik dönüşüm, doğru yorum) dağıt. Son cevap adımı genellikle şık puanının üçte birini geçmesin.
+- Sorudaki kısıtları (ör. "L'Hospital kuralı kullanılamaz") ilgili adımlarda ve genel kurallarda belirt.
+- Hata taşıma: önceki adımdaki bir hatanın sonucunu tutarlı biçimde kullanan sonraki adımlar puan alabilir; bunu generalRules'a yaz.
+- Matematiği $...$ içinde LaTeX ile yaz. Tüm açıklamalar Türkçe olsun.
+${notes ? `\nÖğretim üyesinin notları (öncelikle bunlara uy):\n${notes}\n` : ''}
+Yalnızca şu yapıda geçerli JSON döndür:
+${RUBRIC_SCHEMA}`;
+}
+function rubricRevisePrompt(rubric, instr) {
+  return `Ekteki görüntüler bir sınav kâğıdı; aşağıda bu sınav için mevcut puanlama rubriği (JSON) var.
+Öğretim üyesi şu değişikliği istiyor:
+"""${instr}"""
+Yalnızca istenen değişikliği uygula; diğer kısımları aynen koru. Adım puanlarının toplamı maxPoints'e eşit kalsın, puanlar 0.5'in katı olsun.
+
+Mevcut rubrik:
+${JSON.stringify(rubricForPrompt(rubric))}
+
+Yalnızca aynı yapıda geçerli JSON döndür:
+${RUBRIC_SCHEMA}`;
+}
+function rubricForPrompt(r, withIds = false) {
+  return {
+    generalRules: r.generalRules || '',
+    questions: r.questions.map(q => ({
+      id: q.id, text: q.text, maxPoints: q.maxPoints, answer: q.answer, solution: q.solution, guidance: q.guidance,
+      steps: q.steps.map(s => withIds ? {id: s.id, description: s.description, points: s.points} : {description: s.description, points: s.points})
+    }))
+  };
+}
+function normalizeRubric(out) {
+  const qs = Array.isArray(out && out.questions) ? out.questions : [];
+  const r = {
+    generalRules: String((out && out.generalRules) || ''),
+    questions: qs.map((q, i) => ({
+      id: String(q.id ?? i + 1).trim(),
+      text: String(q.text || ''), answer: String(q.answer || ''), solution: String(q.solution || ''),
+      guidance: Array.isArray(q.commonErrors) ? q.commonErrors.map(c => `${c.error || ''} — ${c.guidance || ''}`).join('\n') : String(q.guidance || ''),
+      maxPoints: r05(Number(q.maxPoints) || 0),
+      steps: (Array.isArray(q.steps) ? q.steps : []).map(s => ({description: String(s.description || ''), points: r05(Number(s.points) || 0)}))
+    }))
+  };
+  assignStepIds(r); return r;
+}
+function assignStepIds(r) { r.questions.forEach(q => q.steps.forEach((s, i) => { s.id = `${q.id}-${i + 1}`; })); }
+const sumSteps = q => q.steps.reduce((a, s) => a + (Number(s.points) || 0), 0);
+const rubricMax = r => r ? r.questions.reduce((a, q) => a + (Number(q.maxPoints) || 0), 0) : 0;
+
+/* ================= Puanlama ================= */
+function gradePrompt(rubric) {
+  return `Sen titiz ve adil bir matematik değerlendiricisisin. Ekteki görüntüler bir öğrencinin el yazısıyla çözdüğü sınav kâğıdıdır (kişisel bilgiler kapatılmıştır).
+Aşağıdaki ONAYLANMIŞ rubriğe göre puanla. Rubriği değiştirme, rubrik dışında puan verme.
+
+Kurallar:
+- Her şıkkın her adımı için 0 ile o adımın puanı arasında, 0.5'in katı bir puan ver. Adım id'lerini aynen kullan.
+- Öğrenci farklı ama matematiksel olarak geçerli bir yol izlediyse, eşdeğer adımlara puan ver.
+- Hata taşıma: önceki bir hatanın sonucunu doğru biçimde kullanan sonraki adımlar puan alır (genel kurallar aksini söylemiyorsa).
+- Çalışma gösterilmeden yalnızca sonuç yazıldıysa, rubrik aksini söylemiyorsa yalnızca sonuç adımına puan ver.
+- Sorudaki kısıtlara (ör. yasaklanan yöntem) uyulmadıysa ilgili adımlara puan verme.
+- Okuyamadığın yerler için tahmin yürütme: "flags" içine "unreadable" ekle ve "confidence" değerini "low" yap.
+- Boş bırakılan şıkta tüm adımlar 0 olsun ve "flags" içine "blank" ekle.
+- "transcript": öğrencinin o şıkta yazdıklarının kısa LaTeX dökümü ($...$ içinde).
+- "reason": her adım için tek cümlelik Türkçe gerekçe.
+
+Rubrik:
+${JSON.stringify(rubricForPrompt(rubric, true))}
+
+Yalnızca şu yapıda geçerli JSON döndür:
+{"questions":[{"id":"1a","transcript":"...","confidence":"high|medium|low","flags":[],"steps":[{"id":"1a-1","points":1,"reason":"..."}]}]}`;
+}
+function normalizeResult(rubric, ai) {
+  const aqs = (ai && Array.isArray(ai.questions)) ? ai.questions : [];
+  return {
+    questions: rubric.questions.map((q, qi) => {
+      const aq = aqs.find(x => String(x.id).trim() === q.id) || aqs[qi] || {};
+      const asteps = Array.isArray(aq.steps) ? aq.steps : [];
+      return {
+        id: q.id, transcript: String(aq.transcript || ''), confidence: String(aq.confidence || ''),
+        flags: Array.isArray(aq.flags) ? aq.flags.map(String) : [],
+        steps: q.steps.map((s, si) => {
+          const as = asteps.find(x => String(x.id).trim() === s.id) || asteps[si] || {};
+          let p = Number(as.points); if (!isFinite(p)) p = 0;
+          return {id: s.id, points: Math.min(Math.max(r05(p), 0), s.points), reason: String(as.reason || '')};
+        })
+      };
+    })
+  };
+}
+const qScore = (res, qid) => { const q = res.questions.find(x => x.id === qid); return q ? q.steps.reduce((a, s) => a + s.points, 0) : 0; };
+const totalScore = res => res.questions.reduce((a, q) => a + q.steps.reduce((b, s) => b + s.points, 0), 0);
+
+/* ================= Durum ================= */
+const S = {view: 'home', tab: 'setup', exams: [], exam: null, papers: [], draft: null, reviewId: null};
+let saveTimer = null;
+const saveExam = () => DB.put('exams', S.exam);
+function debSaveExam() { clearTimeout(saveTimer); saveTimer = setTimeout(() => saveExam().catch(showError), 400); }
+const isStale = p => S.exam && p.result && p.rubricVersion !== S.exam.rubricVersion;
+const byStudent = (a, b) => String(a.studentId).localeCompare(String(b.studentId), 'tr', {numeric: true});
+
+function render() {
+  const app = $('#app');
+  app.innerHTML = S.view === 'home' ? renderHome() : renderExam();
+  renderMath(app);
+  if (S.view === 'exam' && S.tab === 'rubric' && S.exam.rubricStatus === 'draft') updateSums();
+}
+
+/* ---------- Ana sayfa ---------- */
+async function goHome() {
+  closeModal(); S.view = 'home'; S.exam = null; S.papers = [];
+  S.exams = (await DB.all('exams')).sort((a, b) => b.createdAt - a.createdAt); render();
+}
+function rubricBadge(e) {
+  if (e.rubricStatus === 'approved') return `<span class="badge ok">Rubrik onaylı · v${e.rubricVersion}</span>`;
+  if (e.rubricStatus === 'draft') return `<span class="badge warn">Rubrik taslak</span>`;
+  return `<span class="badge">Rubrik yok</span>`;
+}
+function renderHome() {
+  return `
+    ${settings.apiKey ? '' : `<div class="note warn">Başlamak için <a href="#" onclick="openSettings();return false">Ayarlar</a>'dan ücretsiz Gemini API anahtarınızı girin.</div>`}
+    <div class="row between mt"><h1>Sınavlar</h1><button class="btn primary" onclick="newExam()">+ Yeni sınav</button></div>
+    ${S.exams.length ? `<div class="list">${S.exams.map(e => `
+      <button class="card exam-card" onclick="openExam('${e.id}')">
+        <div class="card-title">${esc(e.title)}</div>
+        <div class="muted small" style="margin-top:4px">${new Date(e.createdAt).toLocaleDateString('tr-TR')} &nbsp; ${rubricBadge(e)}</div>
+      </button>`).join('')}</div>`
+      : `<div class="empty">Henüz sınav yok. “Yeni sınav” ile başlayın.</div>`}
+    <div class="row gap mt wrap">
+      <label class="btn ghost">Rubrik dosyasından yeni sınav<input type="file" accept="application/json,.json" hidden onchange="newExamFromRubric(this.files[0])"></label>
+      <label class="btn ghost">Yedekten geri yükle<input type="file" accept="application/json,.json" hidden onchange="importBackup(this.files[0])"></label>
+    </div>
+    <p class="muted small mt">${NATIVE ? 'Veriler bu telefonda, uygulamanın kendi alanında tutulur. Excel, rubrik ve yedek dosyaları Belgeler › Not Asistani klasörüne kaydedilir.' : 'Tüm veriler yalnızca bu cihazın tarayıcısında tutulur. Düzenli olarak “Sonuçlar → Yedek indir” ile yedek alın.'}</p>`;
+}
+async function newExam() {
+  const e = {id: uid(), title: 'Yeni sınav', createdAt: Date.now(), pages: [], notes: '', mask: null,
+    rubric: null, rubricStatus: 'none', rubricVersion: 0, rubricHistory: []};
+  await DB.put('exams', e); openExam(e.id);
+}
+async function openExam(id) {
+  S.exam = await DB.get('exams', id); S.papers = await DB.byExam(id); S.view = 'exam';
+  S.tab = S.exam.rubricStatus === 'approved' ? 'papers' : (S.exam.rubric ? 'rubric' : 'setup'); render();
+}
+function setTab(t) { S.tab = t; render(); window.scrollTo(0, 0); }
+
+/* ---------- Sınav ekranı ---------- */
+function renderExam() {
+  const e = S.exam, ok = e.rubricStatus === 'approved';
+  const tabs = [['setup', '1 · Sınav'], ['rubric', '2 · Rubrik'], ['papers', '3 · Kâğıtlar'], ['results', '4 · Sonuçlar']];
+  const body = {setup: renderSetup, rubric: renderRubric, papers: renderPapers, results: renderResults}[S.tab](e);
+  return `
+    <div class="row between gap"><h1 style="overflow-wrap:anywhere">${esc(e.title)}</h1>${rubricBadge(e)}</div>
+    <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab ${S.tab === k ? 'on' : ''}" ${(k === 'papers' || k === 'results') && !ok ? 'disabled' : ''} onclick="setTab('${k}')">${l}</button>`).join('')}</nav>
+    ${body}`;
+}
+
+/* ---------- 1 · Sınav ---------- */
+function renderSetup(e) {
+  return `<section class="panel">
+    <label class="field" style="margin-top:0"><span>Sınav adı</span>
+      <input value="${esc(e.title)}" oninput="S.exam.title=this.value; debSaveExam()" onchange="render()"></label>
+    <div class="field"><span>Soru kâğıdı (boş hâli)</span>
+      <div class="thumbs">${e.pages.map((p, i) => `
+        <div class="thumb"><img src="${p}" onclick="viewImage(S.exam.pages[${i}])" alt="Sayfa ${i + 1}">
+          ${i === 0 ? maskOverlay(e.mask) : ''}<button class="x" onclick="removePage(${i})" aria-label="Sil">×</button></div>`).join('')}</div>
+      <div class="row gap wrap">
+        <label class="btn">📷 Fotoğraf çek<input type="file" accept="image/*" capture="environment" hidden onchange="addPages(this.files)"></label>
+        <label class="btn">📄 Dosya / PDF<input type="file" accept="image/*,application/pdf" multiple hidden onchange="addPages(this.files)"></label>
+      </div>
+    </div>
+    <label class="field"><span>Puanlama notlarınız <span class="muted small">(isteğe bağlı)</span></span>
+      <textarea rows="3" placeholder="Ör. 1b'de mutlak değeri doğru işaretle açmaya kısmi puan ver. Sonuçta sadeleştirme yapılmamışsa yarım puan kır."
+        oninput="S.exam.notes=this.value; debSaveExam()">${esc(e.notes)}</textarea></label>
+    <div class="field"><span>Ad / numara bölgesi</span>
+      <p class="muted small" style="margin:0 0 8px">Öğrenci kâğıtlarında bu alan, yapay zekaya gönderilmeden önce kapatılır. Her kâğıtta ayrıca düzeltebilirsiniz.</p>
+      <div class="row gap"><button class="btn" ${e.pages.length ? '' : 'disabled'} onclick="editExamMask()">${e.mask ? 'Bölgeyi düzenle' : 'Bölgeyi işaretle'}</button>
+      ${e.mask ? '<span class="badge ok">İşaretli</span>' : '<span class="badge warn">İşaretlenmedi</span>'}</div>
+    </div>
+    <button class="btn primary block" ${e.pages.length ? '' : 'disabled'} onclick="generateRubric()">${e.rubric ? 'Rubriği yeniden öner' : 'Rubrik önerisi oluştur'} →</button>
+    <div class="row end mt"><button class="btn ghost danger small" onclick="deleteExam()">Sınavı sil</button></div>
+  </section>`;
+}
+async function addPages(files) {
+  if (!files || !files.length) return;
+  setBusy('Görüntüler hazırlanıyor…');
+  try { S.exam.pages.push(...await filesToImages(files)); await saveExam(); render(); }
+  catch (e) { showError(e); } finally { setBusy(null); }
+}
+async function removePage(i) {
+  if (!confirm(`${i + 1}. sayfa silinsin mi?`)) return;
+  S.exam.pages.splice(i, 1); if (i === 0) S.exam.mask = null; await saveExam(); render();
+}
+function editExamMask() {
+  openMaskEditor(S.exam.pages[0], S.exam.mask, async m => {
+    closeModal(); if (m !== undefined) { S.exam.mask = m; await saveExam(); } render();
+  });
+}
+async function deleteExam() {
+  if (!confirm('Bu sınav ve tüm öğrenci kâğıtları kalıcı olarak silinecek. Emin misiniz?')) return;
+  if (S.papers.some(p => p.status === 'grading')) return alert('Bu sınavın bir kâğıdı şu an değerlendiriliyor; bitince silebilirsiniz.');
+  const ids = new Set(S.papers.map(p => p.id)); Q.ids = Q.ids.filter(x => !ids.has(x)); updateQueueBar();
+  for (const p of S.papers) await DB.del('papers', p.id);
+  await DB.del('exams', S.exam.id); goHome();
+}
+
+/* ---------- 2 · Rubrik ---------- */
+async function generateRubric(instruction) {
+  const e = S.exam;
+  if (!requireKey()) return;
+  if (!e.pages.length) return toast('Önce soru kâğıdını yükleyin');
+  if (!instruction && e.rubric && !confirm('Mevcut rubrik taslağı yeni bir öneriyle değiştirilecek. Devam edilsin mi?')) return;
+  if (!instruction && e.rubricStatus === 'approved') { toast('Onaylı rubriği değiştirmek için Rubrik sekmesinden “Düzenle”yi kullanın'); return; }
+  setBusy(instruction ? 'Rubrik isteğinize göre güncelleniyor…' : 'Sorular okunuyor ve rubrik hazırlanıyor…');
+  try {
+    const parts = [{text: instruction ? rubricRevisePrompt(e.rubric, instruction) : rubricPrompt(e.notes)}, ...e.pages.map(imgPart)];
+    const r = normalizeRubric(await callGemini(parts));
+    if (!r.questions.length) throw new Error('Model soru bulamadı. Görüntünün okunaklı olduğundan emin olun.');
+    e.rubric = r; e.rubricStatus = 'draft'; await saveExam();
+    S.tab = 'rubric'; render(); window.scrollTo(0, 0);
+    toast('Rubrik taslağı hazır. İnceleyin, düzenleyin ve onaylayın.', 4000);
+  } catch (err) { showError(err); } finally { setBusy(null); }
+}
+function renderRubric(e) {
+  if (!e.rubric) return `<section class="panel"><p>Henüz rubrik yok.</p>
+    <button class="btn primary" ${e.pages.length ? '' : 'disabled'} onclick="generateRubric()">Rubrik önerisi oluştur</button>
+    ${e.pages.length ? '' : '<p class="muted small">Önce “1 · Sınav” sekmesinden soru kâğıdını yükleyin.</p>'}
+    <div class="note small mt">Daha önce indirdiğiniz bir rubrik varsa doğrudan yükleyebilirsiniz.</div>
+    <label class="btn mt">⬆ Rubrik dosyası yükle<input type="file" accept="application/json,.json" hidden onchange="importRubric(this.files[0])"></label></section>`;
+  const r = e.rubric;
+  if (e.rubricStatus === 'approved') return `
+    <section class="panel">
+      <div class="row between wrap gap"><div><b>Onaylı rubrik · v${e.rubricVersion}</b><div class="muted small">Toplam ${fmt(rubricMax(r))} puan · ${r.questions.length} şık</div></div>
+      <div class="row gap wrap"><button class="btn" onclick="exportRubric()">⬇ Rubriği indir</button><button class="btn" onclick="editApprovedRubric()">Düzenle (yeni sürüm)</button></div></div>
+      ${r.generalRules ? `<div class="note small"><b>Genel kurallar:</b> ${esc(r.generalRules)}</div>` : ''}
+      ${r.questions.map(q => `
+        <div class="qcard">
+          <div class="row between"><h3>${esc(q.id)}</h3><span class="pts">${fmt(q.maxPoints)} P</span></div>
+          <div class="preview" style="color:var(--text)">${esc(q.text)}</div>
+          <div class="small"><b>Cevap:</b> ${esc(q.answer)}</div>
+          ${q.steps.map((s, i) => `<div class="ro-step"><span>${i + 1}. ${esc(s.description)}</span><span class="pts">${fmt(s.points)}</span></div>`).join('')}
+          ${q.guidance ? `<details><summary>Kısmi puan yönergesi</summary><div class="small" style="white-space:pre-wrap">${esc(q.guidance)}</div></details>` : ''}
+        </div>`).join('')}
+    </section>`;
+  return `
+    <section class="panel">
+      <div class="note warn small"><b>Taslak.</b> Yapay zekanın önerisini inceleyin; adımları ve puanları düzenleyin. Onaylamadan kâğıt değerlendirmesi başlamaz.</div>
+      <div class="row between wrap gap mt"><b id="rub-total"></b><button class="btn small" onclick="addQuestion()">+ Şık ekle</button></div>
+      <label class="field"><span>Genel kurallar</span>
+        <textarea rows="2" oninput="S.exam.rubric.generalRules=this.value; debSaveExam()">${esc(r.generalRules)}</textarea></label>
+      ${r.questions.map((q, qi) => `
+        <div class="qcard">
+          <div class="qhead">
+            <label class="mini">Şık<input value="${esc(q.id)}" oninput="rq(${qi},'id',this.value)"></label>
+            <label class="mini">Puan<input type="number" step="0.5" min="0" value="${q.maxPoints}" oninput="rq(${qi},'maxPoints',this.value)"></label>
+            <span class="sum" id="sum-${qi}"></span>
+            <span style="flex:1"></span>
+            <button class="btn ghost small danger" onclick="delQuestion(${qi})">Şıkkı sil</button>
+          </div>
+          <label class="field"><span>Soru</span>
+            <textarea rows="2" oninput="rq(${qi},'text',this.value,'pv-t-${qi}')">${esc(q.text)}</textarea>
+            <div class="preview" id="pv-t-${qi}">${esc(q.text)}</div></label>
+          <label class="field"><span>Doğru cevap</span>
+            <input value="${esc(q.answer)}" oninput="rq(${qi},'answer',this.value,'pv-a-${qi}')">
+            <div class="preview" id="pv-a-${qi}">${esc(q.answer)}</div></label>
+          <div class="field"><span>Adımlar ve puanları</span>
+            ${q.steps.map((s, si) => `
+              <div class="step">
+                <textarea rows="2" oninput="rs(${qi},${si},'description',this.value,'pv-s-${qi}-${si}')">${esc(s.description)}</textarea>
+                <input type="number" step="0.5" min="0" value="${s.points}" aria-label="Puan" oninput="rs(${qi},${si},'points',this.value)">
+                <button class="x-btn" onclick="delStep(${qi},${si})" aria-label="Adımı sil">×</button>
+                <div class="preview" id="pv-s-${qi}-${si}">${esc(s.description)}</div>
+              </div>`).join('')}
+            <button class="btn small mt" onclick="addStep(${qi})">+ Adım ekle</button>
+          </div>
+          <details><summary>Model çözüm ve kısmi puan yönergesi</summary>
+            <label class="field"><span>Model çözüm</span><textarea rows="3" oninput="rq(${qi},'solution',this.value)">${esc(q.solution)}</textarea></label>
+            <label class="field"><span>Kısmi puan yönergesi / sık hatalar</span><textarea rows="3" oninput="rq(${qi},'guidance',this.value)">${esc(q.guidance)}</textarea></label>
+          </details>
+        </div>`).join('')}
+      <div class="field"><span>Yapay zekadan değişiklik iste</span>
+        <textarea id="ai-instr" rows="2" placeholder="Ör. 2. soruda her kırılma noktasının incelenmesine eşit puan ver; sonuç adımını 1 puana düşür."></textarea>
+        <button class="btn small mt" onclick="reviseRubric()">Öneriyi güncelle</button></div>
+      <div class="row gap end mt wrap">
+        <button class="btn ghost" onclick="exportRubric()">⬇ Taslağı indir</button>
+        <label class="btn ghost">⬆ Rubrik yükle<input type="file" accept="application/json,.json" hidden onchange="importRubric(this.files[0])"></label>
+        <button class="btn ghost" onclick="generateRubric()">Baştan öner</button>
+        <button class="btn primary" onclick="approveRubric()">Rubriği onayla ✓</button>
+      </div>
+    </section>`;
+}
+function rq(qi, key, val, pv) {
+  const q = S.exam.rubric.questions[qi];
+  q[key] = key === 'maxPoints' ? Number(val) || 0 : val;
+  if (pv) { const el = document.getElementById(pv); if (el) { el.textContent = val; renderMath(el); } }
+  updateSums(); debSaveExam();
+}
+function rs(qi, si, key, val, pv) {
+  const s = S.exam.rubric.questions[qi].steps[si];
+  s[key] = key === 'points' ? Number(val) || 0 : val;
+  if (pv) { const el = document.getElementById(pv); if (el) { el.textContent = val; renderMath(el); } }
+  updateSums(); debSaveExam();
+}
+function updateSums() {
+  const r = S.exam && S.exam.rubric; if (!r) return;
+  r.questions.forEach((q, qi) => {
+    const el = document.getElementById('sum-' + qi); if (!el) return;
+    const s = sumSteps(q), ok = Math.abs(s - q.maxPoints) < 1e-9;
+    el.className = 'sum ' + (ok ? 'ok' : 'bad'); el.textContent = `Adımlar: ${fmt(s)} / ${fmt(q.maxPoints)}`;
+  });
+  const t = document.getElementById('rub-total'); if (t) t.textContent = `Toplam: ${fmt(rubricMax(r))} puan`;
+}
+async function addStep(qi) { S.exam.rubric.questions[qi].steps.push({description: '', points: 0}); await saveExam(); render(); }
+async function delStep(qi, si) { S.exam.rubric.questions[qi].steps.splice(si, 1); await saveExam(); render(); }
+async function addQuestion() {
+  S.exam.rubric.questions.push({id: String(S.exam.rubric.questions.length + 1), text: '', answer: '', solution: '', guidance: '', maxPoints: 0, steps: [{description: '', points: 0}]});
+  await saveExam(); render();
+}
+async function delQuestion(qi) {
+  if (!confirm(`${S.exam.rubric.questions[qi].id} şıkkı silinsin mi?`)) return;
+  S.exam.rubric.questions.splice(qi, 1); await saveExam(); render();
+}
+function reviseRubric() {
+  const instr = ($('#ai-instr').value || '').trim();
+  if (!instr) return toast('Önce ne değişmesini istediğinizi yazın');
+  generateRubric(instr);
+}
+async function approveRubric() {
+  const e = S.exam, r = e.rubric;
+  r.questions.forEach(q => { q.id = String(q.id).trim(); });
+  if (!r.questions.length) return alert('Rubrikte hiç şık yok.');
+  const ids = r.questions.map(q => q.id);
+  const dup = ids.filter((x, i) => !x || ids.indexOf(x) !== i);
+  if (dup.length) return alert('Şık adları boş olamaz ve tekrar edemez: ' + [...new Set(dup)].map(x => x || '(boş)').join(', '));
+  const emptyQ = r.questions.filter(q => !q.steps.length || q.maxPoints <= 0).map(q => q.id);
+  if (emptyQ.length) return alert('Şu şıklarda adım veya puan yok: ' + emptyQ.join(', '));
+  const bad = r.questions.filter(q => Math.abs(sumSteps(q) - q.maxPoints) > 1e-9);
+  if (bad.length) return alert('Şu şıklarda adım puanlarının toplamı şık puanına eşit değil:\n' + bad.map(q => `${q.id}: ${fmt(sumSteps(q))} / ${fmt(q.maxPoints)}`).join('\n'));
+  const summary = r.questions.map(q => `${q.id}: ${fmt(q.maxPoints)} P (${q.steps.length} adım)`).join('\n');
+  if (!confirm(`Rubrik onaylanacak:\n\n${summary}\n\nToplam: ${fmt(rubricMax(r))} P\n\nOnaylıyor musunuz?`)) return;
+  assignStepIds(r);
+  e.rubricVersion = (e.rubricVersion || 0) + 1; e.rubricStatus = 'approved';
+  e.rubricHistory = e.rubricHistory || []; e.rubricHistory.push({version: e.rubricVersion, approvedAt: Date.now(), rubric: clone(r)});
+  await saveExam(); S.tab = 'papers'; render(); toast(`Rubrik v${e.rubricVersion} onaylandı`);
+}
+async function editApprovedRubric() {
+  const graded = S.papers.filter(p => p.result).length;
+  if (!confirm(`Yeni bir rubrik taslağı açılacak. ${graded ? `Değerlendirilmiş ${graded} kâğıt “eski rubrik” olarak işaretlenecek; yeniden değerlendirebilir veya elle güncelleyebilirsiniz. ` : ''}Yeni sürüm onaylanana kadar değerlendirme duraklar. Devam?`)) return;
+  S.exam.rubricStatus = 'draft'; await saveExam(); S.tab = 'rubric'; render();
+}
+
+/* ---------- 3 · Kâğıtlar ---------- */
+function statusBadge(p) {
+  if (p.status === 'reviewed') return '<span class="badge ok">Kontrol edildi ✓</span>';
+  if (p.status === 'graded') return '<span class="badge warn">AI puanladı · kontrol bekliyor</span>';
+  if (p.status === 'error') return `<span class="badge bad" title="${esc(p.error)}">Hata</span>`;
+  if (p.status === 'grading') return '<span class="badge warn"><span class="spin-sm"></span>Değerlendiriliyor…</span>';
+  if (p.status === 'queued') return '<span class="badge">Sırada</span>';
+  return '<span class="badge">Bekliyor</span>';
+}
+function renderPapers(e) {
+  if (e.rubricStatus !== 'approved') return `<section class="panel"><div class="note">Kâğıtları değerlendirmek için önce rubriği onaylayın.</div><button class="btn mt" onclick="setTab('rubric')">Rubriğe git</button></section>`;
+  const max = rubricMax(e.rubric), list = [...S.papers].sort(byStudent);
+  const pending = list.filter(p => p.status === 'pending' || p.status === 'error').length;
+  const stale = list.filter(isStale).length;
+  return `<section class="panel">
+    <div class="row gap wrap">
+      <button class="btn primary" onclick="newPaper()">+ Öğrenci kâğıdı ekle</button>
+      ${pending ? `<button class="btn" onclick="gradeAll()">Bekleyen ${pending} kâğıdı sıraya al</button>` : ''}
+      ${stale ? `<button class="btn" onclick="gradeAll(true)">Eski rubrikli ${stale} kâğıdı yeniden değerlendir</button>` : ''}
+    </div>
+    ${list.length ? `<div class="mt">${list.map(p => `
+      <div class="paper-row">
+        <div><b>${esc(p.studentId)}</b> <span class="muted small">· ${p.images.length} sayfa</span>
+          <div style="margin-top:2px">${statusBadge(p)} ${isStale(p) ? '<span class="badge bad">Eski rubrik</span>' : ''}</div>
+          ${p.status === 'error' ? `<div class="small" style="color:var(--bad)">${esc(p.error)}</div>` : ''}</div>
+        <div class="score">${p.result ? `${fmt(totalScore(normalizeResult(e.rubric, p.result)))} <span class="muted small">/ ${fmt(max)}</span>` : '—'}</div>
+        <div class="acts">${p.status === 'grading' ? '<span class="muted small">Sonuç gelince burada görünecek; bu sırada başka kâğıtlarla çalışabilirsiniz.</span>'
+          : p.status === 'queued' ? `<button class="btn small" onclick="dequeue('${p.id}')">Sıradan çıkar</button>`
+          : `${p.result ? `<button class="btn small primary" onclick="openReview('${p.id}')">İncele</button>` : `<button class="btn small primary" onclick="gradeOne('${p.id}')">Değerlendir</button><button class="btn small" onclick="openReview('${p.id}')">Elle puanla</button>`}
+          <button class="btn small ghost" onclick="editPaper('${p.id}')">Düzenle</button>
+          <button class="btn small ghost danger" onclick="deletePaper('${p.id}')">Sil</button>`}
+        </div>
+      </div>`).join('')}</div>` : `<div class="empty">Henüz öğrenci kâğıdı yok.</div>`}
+  </section>`;
+}
+function newPaper() {
+  S.draft = {paper: {id: uid(), examId: S.exam.id, studentId: '', images: [], mask: S.exam.mask ? {...S.exam.mask} : null, status: 'pending', result: null, createdAt: Date.now()}, isNew: true, imagesChanged: true};
+  renderPaperModal();
+}
+function editPaper(id) {
+  const p = S.papers.find(x => x.id === id);
+  if (p.status === 'queued' || p.status === 'grading') return toast('Önce sıradan çıkarın');
+  S.draft = {paper: clone(p), isNew: false, imagesChanged: false}; renderPaperModal();
+}
+function renderPaperModal() {
+  const p = S.draft.paper;
+  showModal(`
+    <div class="row between"><h2>${S.draft.isNew ? 'Yeni öğrenci kâğıdı' : 'Kâğıdı düzenle'}</h2></div>
+    <label class="field" style="margin-top:4px"><span>Öğrenci numarası</span>
+      <input id="pp-id" inputmode="numeric" autocomplete="off" value="${esc(p.studentId)}" oninput="S.draft.paper.studentId=this.value.trim()"></label>
+    <div class="field"><span>Kâğıt sayfaları</span>
+      <div class="thumbs">${p.images.map((src, i) => `
+        <div class="thumb"><img src="${src}" onclick="viewImage(S.draft.paper.images[${i}])" alt="Sayfa ${i + 1}">${i === 0 ? maskOverlay(p.mask) : ''}
+          <button class="x" onclick="draftRemoveImage(${i})" aria-label="Sil">×</button></div>`).join('')}</div>
+      <div class="row gap wrap">
+        <label class="btn">📷 Fotoğraf çek<input type="file" accept="image/*" capture="environment" hidden onchange="draftAddImages(this.files)"></label>
+        <label class="btn">📁 Dosya / PDF<input type="file" accept="image/*,application/pdf" multiple hidden onchange="draftAddImages(this.files)"></label>
+      </div>
+    </div>
+    <div class="field"><span>Ad / numara bölgesi (1. sayfa)</span>
+      <div class="row gap wrap"><button class="btn small" ${p.images.length ? '' : 'disabled'} onclick="draftEditMask()">${p.mask ? 'Bölgeyi düzenle' : 'Bölgeyi işaretle'}</button>
+      ${p.mask ? '<span class="badge ok">Kapatılacak</span>' : '<span class="badge bad">Kişisel bilgi kapatılmayacak</span>'}</div>
+      <p class="muted small">Kırmızı çerçeveli siyah alan gönderilmeden önce kapatılır. Fotoğraf açısı farklıysa düzeltin.</p>
+    </div>
+    <div class="row gap end mt wrap">
+      <button class="btn ghost" onclick="closeModal()">Vazgeç</button>
+      <button class="btn" onclick="savePaper(false)">Kaydet</button>
+      <button class="btn" onclick="savePaper(true)">Kaydet ve değerlendir</button>
+      ${S.draft.isNew ? '<button class="btn primary" onclick="savePaper(\'next\')">Değerlendir + sıradaki kâğıt →</button>' : ''}
+    </div>`, false);
+  restoreModalHandlers = () => renderPaperModal();
+}
+async function draftAddImages(files) {
+  if (!files || !files.length) return;
+  setBusy('Görüntüler hazırlanıyor…');
+  try { S.draft.paper.images.push(...await filesToImages(files)); S.draft.imagesChanged = true; renderPaperModal(); }
+  catch (e) { showError(e); } finally { setBusy(null); }
+}
+function draftRemoveImage(i) { S.draft.paper.images.splice(i, 1); S.draft.imagesChanged = true; renderPaperModal(); }
+function draftEditMask() {
+  const p = S.draft.paper;
+  openMaskEditor(p.images[0], p.mask, m => { if (m !== undefined) { p.mask = m; S.draft.imagesChanged = true; } renderPaperModal(); });
+}
+async function savePaper(andGrade) {
+  const d = S.draft, p = d.paper;
+  p.studentId = ($('#pp-id').value || '').trim();
+  if (!p.studentId) return toast('Öğrenci numarasını girin');
+  if (!p.images.length) return toast('En az bir sayfa ekleyin');
+  if (S.papers.some(x => x.id !== p.id && x.studentId === p.studentId) && !confirm(`${p.studentId} numaralı bir kâğıt zaten var. Yine de kaydedilsin mi?`)) return;
+  if (!p.mask && !confirm('Ad/numara bölgesi işaretlenmedi; kâğıt kişisel bilgileriyle birlikte gönderilecek. Devam edilsin mi?')) return;
+  if (!d.isNew && d.imagesChanged && p.result) {
+    if (!confirm('Görüntüler değişti. Mevcut puanlama silinip kâğıt yeniden değerlendirmeye alınacak. Devam?')) return;
+    p.result = null; p.status = 'pending';
+  }
+  await DB.put('papers', p);
+  const i = S.papers.findIndex(x => x.id === p.id);
+  if (i >= 0) S.papers[i] = p; else S.papers.push(p);
+  closeModal(); S.draft = null; render();
+  if (andGrade) await enqueue([p.id]);
+  if (andGrade === 'next') newPaper();
+}
+async function deletePaper(id) {
+  const p = S.papers.find(x => x.id === id);
+  if (p.status === 'grading') return toast('Değerlendirme bitince silebilirsiniz');
+  Q.ids = Q.ids.filter(x => x !== id); updateQueueBar();
+  if (!confirm(`${p.studentId} numaralı kâğıt silinsin mi?`)) return;
+  await DB.del('papers', id); S.papers = S.papers.filter(x => x.id !== id); render();
+}
+async function gradePaper(p, exam = S.exam) {
+  const parts = [{text: gradePrompt(exam.rubric)}];
+  for (let i = 0; i < p.images.length; i++) parts.push(imgPart(i === 0 && p.mask ? await applyMask(p.images[0], p.mask) : p.images[i]));
+  try {
+    const out = await callGemini(parts);
+    p.result = normalizeResult(exam.rubric, out); p.status = 'graded'; p.rubricVersion = exam.rubricVersion; p.gradedAt = Date.now(); p.error = null;
+  } catch (err) {
+    const msg = err.message || String(err);
+    // Uygulama alttayken bağlantı kesildiyse hata sayma; geri dönünce yeniden dene.
+    if (document.hidden && /^Ağ hatası/.test(msg)) { p.status = 'queued'; }
+    else { p.status = 'error'; p.error = msg; }
+  }
+  if (!(await DB.get('papers', p.id))) return p; // bu arada silinmiş
+  await DB.put('papers', p); return p;
+}
+function gradeOne(id) { return enqueue([id]); }
+async function gradeAll(staleOnly) {
+  const list = [...S.papers].sort(byStudent).filter(p => staleOnly ? isStale(p) && p.status !== 'queued' && p.status !== 'grading' : (p.status === 'pending' || p.status === 'error'));
+  if (!list.length) return;
+  if (staleOnly && !confirm(`${list.length} kâğıt yeni rubriğe göre yeniden değerlendirilecek; elle yaptığınız düzeltmeler silinir. Devam?`)) return;
+  await enqueue(list.map(p => p.id));
+}
+
+/* ---------- Arka plan değerlendirme sırası ---------- */
+const Q = {ids: [], running: false, stop: false, current: null, label: '', note: '', done: 0, fail: 0, wake: null};
+function syncLocal(p) {
+  if (!S.exam || p.examId !== S.exam.id) return;
+  const i = S.papers.findIndex(x => x.id === p.id);
+  if (i >= 0) S.papers[i] = p; else S.papers.push(p);
+}
+function isEditing() {
+  const a = document.activeElement;
+  return !!(a && $('#app').contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+}
+function refreshAfterQueue() {
+  updateQueueBar();
+  if (S.view === 'exam' && (S.tab === 'papers' || S.tab === 'results') && !isEditing()) render();
+}
+function updateQueueBar() {
+  const b = $('#qbar'); if (!b) return;
+  if (!Q.running && !Q.ids.length) { b.classList.add('hidden'); return; }
+  $('#qbar-text').innerHTML = `<span class="spin-sm"></span>Arka planda değerlendiriliyor${Q.label ? `: ${esc(Q.label)}` : ''} · sırada ${Q.ids.length}${Q.note ? ` · ${esc(Q.note)}` : ''}`;
+  b.classList.remove('hidden');
+}
+async function keepAwake(on) {
+  try {
+    if (on && !Q.wake && navigator.wakeLock && !document.hidden) {
+      Q.wake = await navigator.wakeLock.request('screen');
+      Q.wake.addEventListener('release', () => { Q.wake = null; });
+    } else if (!on && Q.wake) { await Q.wake.release(); Q.wake = null; }
+  } catch (e) { /* desteklenmiyorsa sorun değil */ }
+}
+function waitVisible() {
+  if (!document.hidden) return Promise.resolve();
+  return new Promise(res => { const f = () => { if (!document.hidden) { document.removeEventListener('visibilitychange', f); res(); } }; document.addEventListener('visibilitychange', f); });
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Q.running) keepAwake(true); });
+
+async function enqueue(ids, {silent = false} = {}) {
+  if (!requireKey()) return;
+  let added = 0;
+  for (const id of ids) {
+    if (Q.ids.includes(id) || Q.current === id) continue;
+    const p = S.papers.find(x => x.id === id) || await DB.get('papers', id);
+    if (!p) continue;
+    p.status = 'queued'; p.queuedAt = Date.now(); p.error = null;
+    await DB.put('papers', p); syncLocal(p); Q.ids.push(id); added++;
+  }
+  if (added && !silent) toast(added === 1 ? 'Sıraya alındı; arka planda değerlendirilecek. Çalışmaya devam edebilirsiniz.' : `${added} kâğıt sıraya alındı; arka planda değerlendirilecek.`, 3500);
+  refreshAfterQueue(); runQueue();
+}
+async function dequeue(id) {
+  Q.ids = Q.ids.filter(x => x !== id);
+  const p = S.papers.find(x => x.id === id) || await DB.get('papers', id);
+  if (p && p.status === 'queued') { p.status = p.result ? 'graded' : 'pending'; await DB.put('papers', p); syncLocal(p); }
+  refreshAfterQueue();
+}
+function stopQueue() {
+  Q.stop = true; toast(Q.current ? 'Şu anki kâğıt bitince sıra durdurulacak' : 'Sıra durduruldu');
+  if (!Q.running) finishStop();
+}
+async function finishStop() {
+  for (const id of Q.ids.splice(0)) {
+    const p = await DB.get('papers', id);
+    if (p && p.status === 'queued') { p.status = p.result ? 'graded' : 'pending'; await DB.put('papers', p); syncLocal(p); }
+  }
+  refreshAfterQueue();
+}
+async function runQueue() {
+  if (Q.running || !Q.ids.length) return;
+  Q.running = true; Q.stop = false; Q.done = 0; Q.fail = 0; keepAwake(true); updateQueueBar();
+  try {
+    while (Q.ids.length && !Q.stop) {
+      const id = Q.ids.shift(); Q.current = id;
+      const p = await DB.get('papers', id);
+      if (!p || p.status !== 'queued') continue;
+      const exam = (S.exam && S.exam.id === p.examId) ? S.exam : await DB.get('exams', p.examId);
+      if (!exam || exam.rubricStatus !== 'approved') {
+        p.status = 'error'; p.error = 'Rubrik onaylı değil; onaylayıp yeniden değerlendirin.'; await DB.put('papers', p); syncLocal(p); Q.fail++; continue;
+      }
+      Q.label = p.studentId; p.status = 'grading'; await DB.put('papers', p); syncLocal(p); refreshAfterQueue();
+      await gradePaper(p, exam);
+      syncLocal(p);
+      if (p.status === 'queued') { Q.ids.unshift(p.id); Q.note = 'Uygulama alta alındı; geri dönünce devam edecek'; updateQueueBar(); await waitVisible(); Q.note = ''; }
+      else if (p.status === 'error') Q.fail++;
+      else { Q.done++; toast(`${p.studentId} puanlandı · kontrol bekliyor`); }
+      Q.current = null; Q.label = ''; refreshAfterQueue();
+      if (Q.ids.length && !Q.stop && settings.delay) { Q.note = `ücretsiz kota için ${settings.delay} sn ara`; updateQueueBar(); await sleep(settings.delay * 1000); Q.note = ''; }
+    }
+  } finally {
+    Q.current = null; Q.label = ''; Q.note = ''; Q.running = false; keepAwake(false);
+    if (Q.stop) await finishStop();
+    if (Q.done + Q.fail > 1 || Q.fail) toast(`${Q.done} kâğıt puanlandı${Q.fail ? `, ${Q.fail} hata` : ''}${Q.stop ? ' (durduruldu)' : ''}. Kontrol etmeyi unutmayın.`, 5000);
+    refreshAfterQueue();
+    if (Q.ids.length && !Q.stop) runQueue();
+  }
+}
+async function resumeQueueFromStorage() {
+  const all = await DB.all('papers');
+  const left = all.filter(p => p.status === 'queued' || p.status === 'grading').sort((a, b) => (a.queuedAt || 0) - (b.queuedAt || 0));
+  for (const p of left) { if (p.status === 'grading') { p.status = 'queued'; await DB.put('papers', p); } if (!Q.ids.includes(p.id)) Q.ids.push(p.id); }
+  if (Q.ids.length) { if (settings.apiKey) { toast(`Yarım kalan ${Q.ids.length} kâğıdın değerlendirmesine devam ediliyor`); runQueue(); } else updateQueueBar(); }
+}
+
+/* ---------- İnceleme ---------- */
+function openReview(id) {
+  const p = S.papers.find(x => x.id === id);
+  if (p.status === 'queued' || p.status === 'grading') return toast('Bu kâğıt değerlendirme sırasında');
+  p.result = normalizeResult(S.exam.rubric, p.result || {questions: []});
+  S.reviewId = id; renderReview();
+}
+function renderReview() {
+  const e = S.exam, r = e.rubric, p = S.papers.find(x => x.id === S.reviewId);
+  const conf = c => c === 'low' ? '<span class="badge bad">Düşük güven</span>' : c === 'medium' ? '<span class="badge warn">Orta güven</span>' : c === 'high' ? '<span class="badge ok">Yüksek güven</span>' : '';
+  const flagTxt = f => ({unreadable: 'Okunamayan kısım var', blank: 'Boş'}[f] || f);
+  showModal(`
+    <div class="row between gap"><h2>${esc(p.studentId)}</h2><button class="btn small ghost" onclick="closeModal()">Kapat</button></div>
+    ${isStale(p) ? '<div class="note bad small">Bu kâğıt eski bir rubrik sürümüyle puanlandı; adımlar yeni rubriğe göre eşlendi. Yeniden değerlendirmeniz önerilir.</div>' : ''}
+    ${!p.gradedAt ? '<div class="note small">Bu kâğıt yapay zeka ile değerlendirilmedi; puanları elle girebilirsiniz.</div>' : ''}
+    <div class="review-imgs mt">${p.images.map((src, i) => `<img src="${src}" onclick="viewImage(S.papers.find(x=>x.id===S.reviewId).images[${i}])" alt="Sayfa ${i + 1}">`).join('')}</div>
+    ${r.questions.map((q, qi) => {
+      const rq = p.result.questions[qi];
+      return `<div class="qcard">
+        <div class="row between wrap gap"><h3>${esc(q.id)} <span class="muted small">/ ${fmt(q.maxPoints)} P</span></h3>
+          <div class="row gap">${conf(rq.confidence)} ${rq.flags.map(f => `<span class="badge warn">${esc(flagTxt(f))}</span>`).join(' ')}<b id="rv-q-${qi}"></b></div></div>
+        ${rq.transcript ? `<div class="transcript"><span class="muted small">Öğrencinin yazdığı:</span><br>${esc(rq.transcript)}</div>` : ''}
+        ${q.steps.map((s, si) => `
+          <div class="rv-step">
+            <div class="small">${si + 1}. ${esc(s.description)}</div>
+            <div class="rv-pts"><input type="number" step="0.5" min="0" max="${s.points}" value="${rq.steps[si].points}" oninput="setPts(${qi},${si},this)" aria-label="Puan"> / ${fmt(s.points)}</div>
+            <input class="reason small" value="${esc(rq.steps[si].reason)}" placeholder="Gerekçe" oninput="S.papers.find(x=>x.id===S.reviewId).result.questions[${qi}].steps[${si}].reason=this.value">
+          </div>`).join('')}
+      </div>`;
+    }).join('')}
+    <div class="sticky-foot row between wrap gap">
+      <b id="rv-total"></b>
+      <div class="row gap wrap">
+        <button class="btn" onclick="regradeFromReview()">AI ile yeniden değerlendir</button>
+        <button class="btn primary" onclick="saveReview()">Onayla ve kaydet ✓</button>
+      </div>
+    </div>`, false);
+  restoreModalHandlers = () => renderReview();
+  updateReviewTotals();
+}
+function setPts(qi, si, input) {
+  const p = S.papers.find(x => x.id === S.reviewId), max = S.exam.rubric.questions[qi].steps[si].points;
+  let v = r05(input.value); if (!isFinite(v)) v = 0; v = Math.min(Math.max(v, 0), max);
+  p.result.questions[qi].steps[si].points = v; updateReviewTotals();
+}
+function updateReviewTotals() {
+  const p = S.papers.find(x => x.id === S.reviewId), r = S.exam.rubric;
+  r.questions.forEach((q, qi) => { const el = document.getElementById('rv-q-' + qi); if (el) el.textContent = fmt(qScore(p.result, q.id)) + ' P'; });
+  const t = document.getElementById('rv-total'); if (t) t.textContent = `Toplam: ${fmt(totalScore(p.result))} / ${fmt(rubricMax(r))}`;
+}
+async function saveReview() {
+  const p = S.papers.find(x => x.id === S.reviewId);
+  p.status = 'reviewed'; p.rubricVersion = S.exam.rubricVersion; p.reviewedAt = Date.now();
+  await DB.put('papers', p); closeModal(); render(); toast(`${p.studentId} kaydedildi`);
+}
+async function regradeFromReview() {
+  if (!confirm('Yapay zeka bu kâğıdı yeniden puanlayacak; elle yaptığınız değişiklikler silinir. Devam?')) return;
+  const id = S.reviewId; closeModal(); await enqueue([id]);
+}
+
+/* ---------- 4 · Sonuçlar ---------- */
+function renderResults(e) {
+  const r = e.rubric, qs = r.questions, list = [...S.papers].sort(byStudent).filter(p => p.result);
+  const rows = list.map(p => ({p, res: normalizeResult(r, p.result)}));
+  const avg = f => rows.length ? rows.reduce((a, x) => a + f(x.res), 0) / rows.length : 0;
+  const unreviewed = list.filter(p => p.status !== 'reviewed').length;
+  return `<section class="panel">
+    <div class="row gap wrap">
+      <button class="btn primary" ${rows.length ? '' : 'disabled'} onclick="exportExcel()">⬇ Excel indir</button>
+      <button class="btn" onclick="exportBackup()">Yedek indir (JSON)</button>
+    </div>
+    ${unreviewed ? `<div class="note warn small">${unreviewed} kâğıt henüz kontrol edilmedi. Excel'de “Durum” sütununda belirtilir.</div>` : ''}
+    ${rows.length ? `<div class="tbl-wrap"><table>
+      <thead><tr><th>Öğrenci No</th>${qs.map(q => `<th>${esc(q.id)}<br><span class="muted small">/${fmt(q.maxPoints)}</span></th>`).join('')}<th>Toplam<br><span class="muted small">/${fmt(rubricMax(r))}</span></th></tr></thead>
+      <tbody>${rows.map(({p, res}) => `<tr onclick="openReview('${p.id}')"><td>${esc(p.studentId)} ${p.status === 'reviewed' ? '' : '<span class="badge warn">!</span>'}</td>${qs.map(q => `<td>${fmt(qScore(res, q.id))}</td>`).join('')}<td><b>${fmt(totalScore(res))}</b></td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Ortalama</td>${qs.map(q => `<td>${fmt(avg(res => qScore(res, q.id)))}</td>`).join('')}<td>${fmt(avg(totalScore))}</td></tr></tfoot>
+    </table></div>` : `<div class="empty">Henüz puanlanmış kâğıt yok.</div>`}
+  </section>`;
+}
+function exportExcel() {
+  if (!window.XLSX) return showError('Excel kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)');
+  const e = S.exam, r = e.rubric, qs = r.questions;
+  const list = [...S.papers].sort(byStudent).filter(p => p.result).map(p => ({p, res: normalizeResult(r, p.result)}));
+  const status = p => (p.status === 'reviewed' ? 'Kontrol edildi' : 'Kontrol bekliyor') + (isStale(p) ? ' (eski rubrik)' : '');
+  const num = x => Math.round(x * 100) / 100;
+
+  const summary = [['Öğrenci No', ...qs.map(q => `${q.id} (${q.maxPoints})`), `Toplam (${rubricMax(r)})`, 'Durum']];
+  list.forEach(({p, res}) => summary.push([p.studentId, ...qs.map(q => num(qScore(res, q.id))), num(totalScore(res)), status(p)]));
+  if (list.length) summary.push(['Ortalama', ...qs.map(q => num(list.reduce((a, x) => a + qScore(x.res, q.id), 0) / list.length)), num(list.reduce((a, x) => a + totalScore(x.res), 0) / list.length), '']);
+
+  const stepCols = qs.flatMap(q => q.steps.map((s, i) => ({q, s, label: `${q.id} · A${i + 1} (${s.points})`})));
+  const detail = [['Öğrenci No', ...stepCols.map(c => c.label), 'Toplam']];
+  list.forEach(({p, res}) => detail.push([p.studentId, ...stepCols.map(c => num(res.questions.find(x => x.id === c.q.id).steps.find(x => x.id === c.s.id).points)), num(totalScore(res))]));
+
+  const reasons = [['Öğrenci No', 'Şık', 'Adım', 'Adım açıklaması', 'Puan', 'Maks', 'Gerekçe', 'Güven', 'Öğrencinin yazdığı']];
+  list.forEach(({p, res}) => qs.forEach(q => {
+    const rq = res.questions.find(x => x.id === q.id);
+    q.steps.forEach((s, i) => reasons.push([p.studentId, q.id, i + 1, s.description, num(rq.steps[i].points), s.points, rq.steps[i].reason, rq.confidence, i === 0 ? rq.transcript : '']));
+  }));
+
+  const rub = [['Şık', 'Adım', 'Açıklama', 'Puan', 'Doğru cevap']];
+  qs.forEach(q => q.steps.forEach((s, i) => rub.push([q.id, i + 1, s.description, s.points, i === 0 ? q.answer : ''])));
+  rub.push([], ['Rubrik sürümü', `v${e.rubricVersion}`], ['Genel kurallar', r.generalRules]);
+
+  const wb = XLSX.utils.book_new();
+  const add = (aoa, name, cols) => { const ws = XLSX.utils.aoa_to_sheet(aoa); ws['!cols'] = cols; XLSX.utils.book_append_sheet(wb, ws, name); };
+  add(summary, 'Özet', [{wch: 14}, ...qs.map(() => ({wch: 9})), {wch: 12}, {wch: 26}]);
+  add(detail, 'Adım Detayı', [{wch: 14}, ...stepCols.map(() => ({wch: 13})), {wch: 10}]);
+  add(reasons, 'Gerekçeler', [{wch: 14}, {wch: 6}, {wch: 6}, {wch: 50}, {wch: 6}, {wch: 6}, {wch: 50}, {wch: 8}, {wch: 50}]);
+  add(rub, 'Rubrik', [{wch: 14}, {wch: 6}, {wch: 60}, {wch: 6}, {wch: 30}]);
+  const buf = XLSX.write(wb, {bookType: 'xlsx', type: 'array'});
+  download(new Blob([buf], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), `${safeName(e.title)}_sonuclar.xlsx`);
+}
+function exportRubric() {
+  const e = S.exam;
+  if (!e.rubric) return toast('İndirilecek rubrik yok');
+  const data = {app: 'not-asistani', kind: 'rubric', format: 1, exportedAt: new Date().toISOString(),
+    title: e.title, notes: e.notes || '', status: e.rubricStatus, version: e.rubricVersion, rubric: e.rubric};
+  download(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}), `${safeName(e.title)}_rubrik_${e.rubricStatus === 'approved' ? 'v' + e.rubricVersion : 'taslak'}.json`);
+}
+async function readRubricFile(file) {
+  const data = JSON.parse(await file.text());
+  if (data.app !== 'not-asistani') throw new Error('Bu dosya bir Not Asistanı rubriği değil');
+  const src = data.kind === 'rubric' ? data : (data.exam ? {title: data.exam.title, notes: data.exam.notes, rubric: data.exam.rubric} : null);
+  if (!src || !src.rubric || !Array.isArray(src.rubric.questions) || !src.rubric.questions.length) throw new Error('Dosyada rubrik bulunamadı');
+  const r = clone(src.rubric);
+  r.generalRules = String(r.generalRules || '');
+  r.questions = r.questions.map(q => ({id: String(q.id).trim(), text: String(q.text || ''), answer: String(q.answer || ''),
+    solution: String(q.solution || ''), guidance: String(q.guidance || ''), maxPoints: Number(q.maxPoints) || 0,
+    steps: (q.steps || []).map(x => ({description: String(x.description || ''), points: Number(x.points) || 0}))}));
+  assignStepIds(r);
+  return {title: src.title || 'Yüklenen rubrik', notes: src.notes || '', rubric: r};
+}
+async function importRubric(file) {
+  if (!file) return;
+  try {
+    const {rubric, notes} = await readRubricFile(file);
+    const e = S.exam;
+    if (e.rubric && !confirm(`Bu sınavdaki mevcut rubrik, yüklenen rubrikle değiştirilecek${S.papers.some(p => p.result) ? '; puanlanmış kâğıtlar “eski rubrik” olarak işaretlenecek' : ''}. Devam?`)) return;
+    e.rubric = rubric; e.rubricStatus = 'draft';
+    if (!e.notes && notes) e.notes = notes;
+    await saveExam(); S.tab = 'rubric'; render(); window.scrollTo(0, 0);
+    toast('Rubrik yüklendi. İnceleyip onaylayın.', 4000);
+  } catch (err) { showError(err); }
+}
+async function newExamFromRubric(file) {
+  if (!file) return;
+  try {
+    const {title, notes, rubric} = await readRubricFile(file);
+    const e = {id: uid(), title, createdAt: Date.now(), pages: [], notes, mask: null,
+      rubric, rubricStatus: 'draft', rubricVersion: 0, rubricHistory: []};
+    await DB.put('exams', e); await openExam(e.id);
+    toast('Rubrik yüklendi. İnceleyip onaylayın; ad/numara bölgesini “1 · Sınav” sekmesinden işaretleyebilirsiniz.', 5000);
+  } catch (err) { showError(err); }
+}
+async function exportBackup() {
+  const data = {app: 'not-asistani', format: 1, exportedAt: new Date().toISOString(), exam: S.exam, papers: S.papers};
+  download(new Blob([JSON.stringify(data)], {type: 'application/json'}), `${safeName(S.exam.title)}_yedek.json`);
+}
+async function importBackup(file) {
+  if (!file) return;
+  setBusy('Yedek yükleniyor…');
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.app !== 'not-asistani' || !data.exam) throw new Error('Bu dosya bir Not Asistanı yedeği değil');
+    if (await DB.get('exams', data.exam.id) && !confirm(`“${data.exam.title}” zaten var. Üzerine yazılsın mı?`)) return;
+    await DB.put('exams', data.exam);
+    for (const p of (data.papers || [])) await DB.put('papers', p);
+    toast('Yedek yüklendi'); await openExam(data.exam.id);
+  } catch (e) { showError(e); } finally { setBusy(null); }
+}
+
+/* ================= Başlat ================= */
+(async () => {
+  try {
+    await DB.open();
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    if (NATIVE && Plug('App')) {
+      Plug('App').addListener('backButton', () => {
+        if (!$('#busy').classList.contains('hidden')) return;
+        if (!$('#modal').classList.contains('hidden')) { if (MASK) finishMask('cancel'); else closeModal(); return; }
+        if (S.view === 'exam') { goHome(); return; }
+        Plug('App').exitApp();
+      });
+    }
+    await goHome();
+    resumeQueueFromStorage().catch(console.error);
+  } catch (e) {
+    $('#app').innerHTML = `<div class="note bad">Tarayıcı depolaması açılamadı (gizli pencere olabilir). Uygulama verileri kaydedemez.<br><small>${esc(e && e.message)}</small></div>`;
+  }
+})();
+</script>
+</body>
+</html>

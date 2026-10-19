@@ -1,0 +1,23 @@
+{
+  "name": "not-asistani",
+  "version": "1.0.0",
+  "private": true,
+  "description": "El yazısı matematik sınavlarını rubriğe göre yapay zeka yardımıyla puanlayan kişisel uygulama",
+  "license": "MIT",
+  "scripts": {
+    "build:www": "node scripts/build-www.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/share": "8.0.3",
+    "katex": "0.16.9",
+    "pdfjs-dist": "3.11.174",
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}

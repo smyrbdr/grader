@@ -1,0 +1,8 @@
+{
+  "appId": "com.notasistani.app",
+  "appName": "Not Asistanı",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}
