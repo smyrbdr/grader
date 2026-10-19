@@ -231,14 +231,12 @@ const safeName = s => (s || 'sinav').replace(/[\\/:*?"<>|]+/g, '_').trim().slice
 
 /* ================= Ayarlar ================= */
 const SETTINGS_KEY = 'na_settings';
-const DEFAULT_SETTINGS = {apiKey: '', model: 'gemini-3.8-flash', delay: 6};
-const RETIRED_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite'];
+const DEFAULT_SETTINGS = {apiKey: '', model: 'gemini-3.8-flash', fallbacks: [], modelList: [], delay: 6};
 function loadSettings() {
   try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); }
   catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
 }
 let settings = loadSettings();
-if (RETIRED_MODELS.includes(settings.model)) { settings.model = DEFAULT_SETTINGS.model; try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
 function saveSettings() {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
   catch (e) { toast('Ayarlar tarayıcıya kaydedilemedi.'); }
@@ -255,10 +253,10 @@ function openSettings() {
       </div>
     </label>
     <p class="muted small">Ücretsiz anahtarı <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> adresinden alabilirsiniz. Anahtar yalnızca bu cihazın tarayıcısında saklanır.</p>
-    <label class="field"><span>Model</span>
-      <input id="set-model" list="models" value="${esc(settings.model)}">
-      <datalist id="models"><option value="gemini-3.8-flash"></datalist>
-    </label>
+    <div class="field"><span>Model</span>
+      <div id="model-box">${modelBoxHtml()}</div>
+      <button type="button" class="btn small mt" onclick="fetchModels()">↻ Anahtarımla kullanılabilen modelleri getir</button>
+    </div>
     <label class="field"><span>Toplu değerlendirmede kâğıtlar arası bekleme (sn)</span>
       <input id="set-delay" type="number" min="0" step="1" value="${esc(settings.delay)}">
     </label>
@@ -270,6 +268,45 @@ function openSettings() {
       <button class="btn primary" onclick="saveSettingsFromForm()">Kaydet</button>
     </div>`);
 }
+function modelOptions() {
+  const set = new Set([...(settings.modelList || []), settings.model, ...(settings.fallbacks || [])].filter(Boolean));
+  return [...set];
+}
+function modelBoxHtml() {
+  const opts = modelOptions();
+  return `
+    <label class="small muted">Ana model</label>
+    <select id="set-model">${opts.map(m => `<option value="${esc(m)}" ${m === settings.model ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>
+    <div class="small muted mt">Yedek modeller: ana modelin ücretsiz kotası dolunca sırayla bunlara geçilir.</div>
+    <div id="set-fallbacks" style="display:grid;gap:4px;margin-top:6px">
+      ${opts.length > 1 ? opts.map(m => `<label class="row gap small" style="font-weight:500"><input type="checkbox" value="${esc(m)}" style="width:auto" ${(settings.fallbacks || []).includes(m) ? 'checked' : ''}> ${esc(m)}</label>`).join('')
+        : '<span class="small muted">Liste için aşağıdaki düğmeye basın.</span>'}
+    </div>`;
+}
+async function fetchModels() {
+  readSettingsForm();
+  if (!settings.apiKey) return toast('Önce API anahtarını girin');
+  setBusy('Modeller getiriliyor…');
+  try {
+    let names = [], token = '';
+    do {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200${token ? '&pageToken=' + encodeURIComponent(token) : ''}`, {headers: {'x-goog-api-key': cleanKey(settings.apiKey)}});
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((data.error && data.error.message) || `HTTP ${res.status}`);
+      for (const m of data.models || []) {
+        const id = String(m.name || '').replace(/^models\//, '');
+        if (!(m.supportedGenerationMethods || []).includes('generateContent')) continue;
+        if (/embedding|tts|image-generation|imagen|veo|live|native-audio|aqa|computer-use|robotics/i.test(id)) continue;
+        names.push(id);
+      }
+      token = data.nextPageToken || '';
+    } while (token);
+    names = [...new Set(names)].sort((a, b) => b.localeCompare(a, 'en', {numeric: true}));
+    settings.modelList = names; saveSettings();
+    $('#model-box').innerHTML = modelBoxHtml();
+    toast(`${names.length} model bulundu`);
+  } catch (e) { showError(e); } finally { setBusy(null); }
+}
 function toggleKey() {
   const i = $('#set-key'), b = $('#key-eye'), show = i.type === 'password';
   i.type = show ? 'text' : 'password'; b.textContent = show ? '🙈' : '👁';
@@ -278,7 +315,9 @@ function toggleKey() {
 function cleanKey(k) { return String(k || '').trim(); }
 function readSettingsForm() {
   settings.apiKey = cleanKey($('#set-key').value);
-  settings.model = $('#set-model').value.trim() || DEFAULT_SETTINGS.model;
+  settings.model = ($('#set-model') && $('#set-model').value.trim()) || settings.model || DEFAULT_SETTINGS.model;
+  const fb = document.querySelectorAll('#set-fallbacks input[type=checkbox]');
+  if (fb.length) settings.fallbacks = [...fb].filter(c => c.checked).map(c => c.value).filter(m => m !== settings.model);
   settings.delay = Math.max(0, Number($('#set-delay').value) || 0);
 }
 function saveSettingsFromForm() { readSettingsForm(); saveSettings(); closeModal(); toast('Ayarlar kaydedildi'); render(); }
@@ -416,30 +455,41 @@ function parseJSON(t) {
   try { return JSON.parse(t); }
   catch (e) { const m = t.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); throw new Error('Model yanıtı JSON olarak okunamadı'); }
 }
-async function callGemini(parts, {retries = 3} = {}) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(settings.model)}:generateContent`;
-  const body = JSON.stringify({contents: [{role: 'user', parts}], generationConfig: {temperature: 0.2, responseMimeType: 'application/json'}});
-  if (/[^\x20-\x7E]/.test(cleanKey(settings.apiKey))) throw new Error('API anahtarında görünmez veya özel bir karakter var. Ayarlar\'da 👁 ile kontrol edip anahtarı yeniden yapıştırın.');
+const EXHAUSTED = new Map(); // model -> zaman (kotası dolan modeller bir süre atlanır)
+let LAST_MODEL = '';
+const NO_JSON_MODE = new Set(); // JSON modunu desteklemeyen modeller
+function quotaError(model, msg) { const e = new Error(msg); e.quota = true; e.model = model; return e; }
+function retryDelaySec(data) {
+  const d = ((data.error && data.error.details) || []).find(x => x.retryDelay);
+  const n = d ? parseFloat(String(d.retryDelay)) : NaN;
+  return isFinite(n) ? Math.ceil(n) + 1 : null;
+}
+async function callModel(model, parts, retries) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+  let jsonMode = !NO_JSON_MODE.has(model);
   for (let a = 0; ; a++) {
+    const cfg = {temperature: 0.2}; if (jsonMode) cfg.responseMimeType = 'application/json';
+    const body = JSON.stringify({contents: [{role: 'user', parts}], generationConfig: cfg});
     let res;
     try { res = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': cleanKey(settings.apiKey)}, body}); }
     catch (err) { if (a < retries) { await sleep(3000 * (a + 1)); continue; } throw new Error('Ağ hatası: ' + err.message); }
-    if ([429, 500, 503].includes(res.status) && a < retries) {
-      const wait = 20 * (a + 1);
-      setBusyNote(`Kota veya yoğunluk sınırı: ${wait} sn sonra yeniden denenecek…`);
-      await sleep(wait * 1000); setBusyNote(''); continue;
-    }
     const data = await res.json().catch(() => ({}));
+    const msg = (data.error && data.error.message) || `HTTP ${res.status}`;
+    if (res.status === 429) {
+      // Günlük kota dolduysa beklemenin anlamı yok: hemen yedek modele geç.
+      if (/per ?day|PerDay|daily/i.test(msg + JSON.stringify(data.error && data.error.details || ''))) throw quotaError(model, msg);
+      const wait = retryDelaySec(data) || 20 * (a + 1);
+      if (a < retries && wait <= 90) { setBusyNote(`${model}: dakikalık sınır, ${wait} sn bekleniyor…`); await sleep(wait * 1000); setBusyNote(''); continue; }
+      throw quotaError(model, msg);
+    }
+    if ([500, 502, 503, 504].includes(res.status) && a < retries) {
+      const wait = 15 * (a + 1); setBusyNote(`${model} yoğun, ${wait} sn sonra yeniden denenecek…`); await sleep(wait * 1000); setBusyNote(''); continue;
+    }
+    if (res.status === 400 && jsonMode && /json mode|response_?mime_?type|mime type/i.test(msg)) { jsonMode = false; NO_JSON_MODE.add(model); continue; }
     if (!res.ok) {
-      const msg = (data.error && data.error.message) || `HTTP ${res.status}`;
       const sug = msg.match(/use models\/([A-Za-z0-9.\-]+)/);
-      if (sug && sug[1] !== settings.model && !callGemini._switched) {
-        callGemini._switched = true;
-        settings.model = sug[1]; saveSettings();
-        toast(`Model güncellendi: ${sug[1]}`, 4000);
-        const r = await callGemini(parts, {retries}); callGemini._switched = false; return r;
-      }
-      callGemini._switched = false;
+      if (sug && sug[1] !== model) { const e = new Error(msg); e.suggest = sug[1]; e.unavailable = true; throw e; }
+      if (res.status === 404 || /not found|no longer available|not supported/i.test(msg)) { const e = new Error(msg); e.unavailable = true; throw e; }
       throw new Error(msg);
     }
     const cand = data.candidates && data.candidates[0];
@@ -447,6 +497,35 @@ async function callGemini(parts, {retries = 3} = {}) {
     if (!text) throw new Error('Model boş yanıt döndürdü' + (cand && cand.finishReason ? ` (${cand.finishReason})` : ''));
     return parseJSON(text);
   }
+}
+async function callGemini(parts, {retries = 3} = {}) {
+  if (/[^\x20-\x7E]/.test(cleanKey(settings.apiKey))) throw new Error('API anahtarında görünmez veya özel bir karakter var. Ayarlar\'da 👁 ile kontrol edip anahtarı yeniden yapıştırın.');
+  const chain = [settings.model, ...(settings.fallbacks || [])].filter((m, i, arr) => m && arr.indexOf(m) === i);
+  const now = Date.now(), HOUR = 3600 * 1000;
+  let lastErr = null;
+  for (let i = 0; i < chain.length; i++) {
+    const model = chain[i], isLast = i === chain.length - 1;
+    if (!isLast && EXHAUSTED.has(model) && now - EXHAUSTED.get(model) < HOUR) continue;
+    try {
+      const out = await callModel(model, parts, retries);
+      EXHAUSTED.delete(model); LAST_MODEL = model; return out;
+    } catch (e) {
+      lastErr = e;
+      if (e.suggest && !chain.includes(e.suggest)) {
+        // Google önerdiği modele geç ve ayarı güncelle
+        if (model === settings.model) { settings.model = e.suggest; saveSettings(); toast(`Ana model güncellendi: ${e.suggest}`, 4000); }
+        chain.splice(i + 1, 0, e.suggest); continue;
+      }
+      if (e.quota || e.unavailable) {
+        if (e.quota) EXHAUSTED.set(model, Date.now());
+        const next = chain.slice(i + 1).find(m => !(EXHAUSTED.has(m) && now - EXHAUSTED.get(m) < HOUR)) || chain[i + 1];
+        if (next) { setBusyNote(`${model} ${e.quota ? 'kotası doldu' : 'kullanılamıyor'} → ${next} deneniyor`); toast(`${model} ${e.quota ? 'kotası doldu' : 'kullanılamıyor'}; ${next} modeline geçildi`, 4000); continue; }
+        if (e.quota) throw new Error(`Ücretsiz kota doldu (${model}). Ayarlar'dan yedek model ekleyin ya da kotanın yenilenmesini bekleyin.\n\nAyrıntı: ${e.message}`);
+      }
+      throw e;
+    }
+  }
+  throw lastErr || new Error('Kullanılabilir model yok');
 }
 
 /* ================= Rubrik ================= */
@@ -933,7 +1012,7 @@ async function gradePaper(p, exam = S.exam) {
   for (let i = 0; i < p.images.length; i++) parts.push(imgPart(i === 0 && p.mask ? await applyMask(p.images[0], p.mask) : p.images[i]));
   try {
     const out = await callGemini(parts);
-    p.result = normalizeResult(exam.rubric, out); p.status = 'graded'; p.rubricVersion = exam.rubricVersion; p.gradedAt = Date.now(); p.error = null;
+    p.result = normalizeResult(exam.rubric, out); p.status = 'graded'; p.rubricVersion = exam.rubricVersion; p.gradedAt = Date.now(); p.error = null; p.model = LAST_MODEL;
   } catch (err) {
     const msg = err.message || String(err);
     // Uygulama alttayken bağlantı kesildiyse hata sayma; geri dönünce yeniden dene.
@@ -1066,7 +1145,7 @@ function renderReview() {
   showModal(`
     <div class="row between gap"><h2>${esc(p.studentId)}</h2><button class="btn small ghost" onclick="closeModal()">Kapat</button></div>
     ${isStale(p) ? '<div class="note bad small">Bu kâğıt eski bir rubrik sürümüyle puanlandı; adımlar yeni rubriğe göre eşlendi. Yeniden değerlendirmeniz önerilir.</div>' : ''}
-    ${!p.gradedAt ? '<div class="note small">Bu kâğıt yapay zeka ile değerlendirilmedi; puanları elle girebilirsiniz.</div>' : ''}
+    ${!p.gradedAt ? '<div class="note small">Bu kâğıt yapay zeka ile değerlendirilmedi; puanları elle girebilirsiniz.</div>' : (p.model ? `<div class="muted small">Puanlayan model: ${esc(p.model)}</div>` : '')}
     <div class="review-imgs mt">${p.images.map((src, i) => `<img src="${src}" onclick="viewImage(S.papers.find(x=>x.id===S.reviewId).images[${i}])" alt="Sayfa ${i + 1}">`).join('')}</div>
     ${r.questions.map((q, qi) => {
       const rq = p.result.questions[qi];
@@ -1138,8 +1217,8 @@ function exportExcel() {
   const status = p => (p.status === 'reviewed' ? 'Kontrol edildi' : 'Kontrol bekliyor') + (isStale(p) ? ' (eski rubrik)' : '');
   const num = x => Math.round(x * 100) / 100;
 
-  const summary = [['Öğrenci No', ...qs.map(q => `${q.id} (${q.maxPoints})`), `Toplam (${rubricMax(r)})`, 'Durum']];
-  list.forEach(({p, res}) => summary.push([p.studentId, ...qs.map(q => num(qScore(res, q.id))), num(totalScore(res)), status(p)]));
+  const summary = [['Öğrenci No', ...qs.map(q => `${q.id} (${q.maxPoints})`), `Toplam (${rubricMax(r)})`, 'Durum', 'Model']];
+  list.forEach(({p, res}) => summary.push([p.studentId, ...qs.map(q => num(qScore(res, q.id))), num(totalScore(res)), status(p), p.model || '']));
   if (list.length) summary.push(['Ortalama', ...qs.map(q => num(list.reduce((a, x) => a + qScore(x.res, q.id), 0) / list.length)), num(list.reduce((a, x) => a + totalScore(x.res), 0) / list.length), '']);
 
   const stepCols = qs.flatMap(q => q.steps.map((s, i) => ({q, s, label: `${q.id} · A${i + 1} (${s.points})`})));
